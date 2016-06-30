@@ -1,0 +1,43 @@
+
+config defaults
+	option syn_flood '1'
+	option input 'ACCEPT'
+	option output 'ACCEPT'
+	option forward 'REJECT'
+
+config include
+	option path '/etc/firewall.user'
+
+config zone
+	option forward 'REJECT'
+	option output 'ACCEPT'
+	option name 'tunezone'
+	option network 'TUN'
+	option input 'REJECT'
+	option masq '1'
+	option mtu_fix '1'
+
+config zone
+	option input 'ACCEPT'
+	option forward 'REJECT'
+	option output 'ACCEPT'
+	option name 'lanzone'
+	option network 'lan'
+
+config forwarding
+	option dest 'tunezone'
+	option src 'lanzone'
+
+config zone
+	option forward 'REJECT'
+	option output 'ACCEPT'
+	option name 'wan'
+	option network 'wan'
+	option input 'REJECT'
+	option masq '1'
+	option mtu_fix '1'
+
+config forwarding
+	option dest 'wan'
+	option src 'lanzone'
+

@@ -1,0 +1,64 @@
+<%#
+		страница vpn-manager
+-%>
+
+<%
+   
+   if luci.http.formvalue("status") == "1" then
+   
+   io.input("/sys/class/net/eth0/address") 
+   t = io.read("*line") 
+   
+    luci.http.prepare_content("application/json")
+    luci.http.write_json({result = t})
+
+    return
+    end
+
+-%>
+
+<%+header%>
+<script type="text/javascript" src="/luci-static/resources/xhr.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+
+
+<fieldset class="cbi-section">
+
+<div class="cbi-map" ng-app="myApp" ng-controller="myCtrl">
+    <label>Оплата</label>  
+    <br/>
+    <label>Ваш MAC: {{mac}}</label><button ng-click="doit()">Показать</button>
+    <br/>
+    <a href="https://vpn-service.herokuapp.com/">Ссылка на оплату</a> 
+
+</div>
+</fieldset>
+    
+        <script type="text/javascript" charset="utf-8">
+
+        var app = angular.module('myApp', []);
+        app.controller('myCtrl', function($scope,$window,$http) {
+            $scope.mac = "-";
+            //$scope.doit();
+            $scope.doit = function(){
+                send();
+            }
+            
+            
+        var iwxhr = new XHR();
+        function send() {
+            iwxhr.get('<%=REQUEST_URI%>', { status:1 },
+                function(x, info)	{
+                    //alert(info.result);
+                    //alert(JSON.stringify(info));
+                    $scope.mac = info.result;
+                    //$window.reload();
+                }
+            )
+        }
+            
+        });
+
+    </script>
+
+<%+footer%>

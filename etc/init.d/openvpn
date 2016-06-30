@@ -1,0 +1,26 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start() {
+    local TMPPATH=/tmp/openvpn
+    [ ! -d ${TMPPATH} ] && mkdir ${TMPPATH}
+    cd ${TMPPATH}
+    opkg update || exit 1 
+    opkg install kmod-tun zlib liblzo
+    tar xzf $(opkg download libopenssl | grep Downloaded | cut -d\  -f4 | sed '$s/.$//') 
+    tar xzf data.tar.gz 
+    tar xzf $(opkg download openvpn | grep Downloaded | cut -d\  -f4 | sed '$s/.$//')
+    tar xzf data.tar.gz                                                              
+    rm -f pkg.tar.gz data.tar.gz control.tar.gz debian-binary getopenvpn.sh          
+    for i in $(ls ${TMPPATH}/usr/lib)                                                                              
+        do                                                                                                         
+        [ ! -f /usr/lib/$i ] && ln -s  /tmp/openvpn/usr/lib/$i  /usr/lib/$i                                        
+        done                                                                                                       
+    ${TMPPATH}/usr/sbin/openvpn  --writepid /tmp/ovpn_ciberterminal.pid --daemon --cd /etc/openvpn --config vpn.conf
+        }                                                                                                           
+                                                                                                                   
+stop() {                                                                                                           
+       PIDOF=$(ps | egrep openvpn | egrep  -v grep | awk '{print $1}')                                             
+       kill ${PIDOF}                                                                                               
+       }
